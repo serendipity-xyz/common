@@ -38,24 +38,9 @@ func (l mockStdOutLogger) Error(s string, a ...interface{}) {
 	fmt.Printf(s, a...)
 }
 
-type callContextalizer interface {
-	DatabaseManager() storage.Manager
-	L() types.Logger
-}
-
-type mockCallContext struct{}
-
-func (cc *mockCallContext) DatabaseManager() storage.Manager {
-	return MockDBManager{}
-}
-
-func (cc *mockCallContext) L() types.Logger {
-	return mockStdOutLogger{}
-}
-
 type MockUserService struct{}
 
-func (mock *MockUserService) SetUserTokens(cc *strava.CallContextalizer, userID string, tokens strava.Tokens) error {
+func (mock *MockUserService) SetUserTokens(cc strava.CallContextalizer, userID string, tokens strava.Tokens) error {
 	return nil
 }
 

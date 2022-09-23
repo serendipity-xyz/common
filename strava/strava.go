@@ -35,7 +35,7 @@ type CallContextalizer interface {
 }
 
 type TokenManager interface {
-	SetUserTokens(cc *CallContextalizer, userID string, tokens Tokens) error
+	SetUserTokens(cc CallContextalizer, userID string, tokens Tokens) error
 }
 
 // Client represents a strava client that can list and retrieve a user's activities
@@ -162,7 +162,7 @@ func (sc *Client) refreshAccessToken(cc CallContextalizer) error {
 		RefreshToken: result.RefreshToken,
 		ExpiresAt:    result.ExpiresAt,
 	}
-	if err := sc.tokenManager.SetUserTokens(&cc, sc.userID, tokens); err != nil {
+	if err := sc.tokenManager.SetUserTokens(cc, sc.userID, tokens); err != nil {
 		cc.L().Warn("unable to update users access tokens in db: %v", err) // still process the request
 	}
 	sc.accessToken = tokens.AccessToken
