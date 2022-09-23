@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/serendipity-xyz/core/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,16 +27,16 @@ type mongoClient struct {
 	database *mongo.Database
 }
 
-type callContext struct {
+type CallContext struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 }
 
 // NewCallContext is used when a client wants to make a call to the data store and provide a
 // context object
-func NewCallContext() *callContext {
+func NewCallContext() *CallContext {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	return &callContext{ctx: ctx, cancel: cancel}
+	return &CallContext{ctx: ctx, cancel: cancel}
 }
 
 // NewMongoClient returns a new mongoDB client
@@ -51,7 +52,7 @@ func (mc *mongoClient) Collection(collection string) *mongo.Collection {
 	return mc.database.Collection(collection)
 }
 
-func (mc *mongoClient) Close(l logger) {
+func (mc *mongoClient) Close(l types.Logger) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	defer func() {
@@ -74,7 +75,7 @@ func (fop *FindOneParams) valid() bool {
 	return fop.Collection != "" && fop.Filter != nil
 }
 
-func (mc *mongoClient) FindOne(l logger, cc *callContext, params *FindOneParams) (Decoder, error) {
+func (mc *mongoClient) FindOne(l types.Logger, cc *CallContext, params *FindOneParams) (Decoder, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return nil, MissingRequiredParameterError{}
@@ -109,7 +110,7 @@ func (fmp *FindManyParams) valid() bool {
 	return fmp.Collection != "" && fmp.Filter != nil
 }
 
-func (mc *mongoClient) FindMany(l logger, cc *callContext, params *FindManyParams) (Decoder, error) {
+func (mc *mongoClient) FindMany(l types.Logger, cc *CallContext, params *FindManyParams) (Decoder, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return nil, MissingRequiredParameterError{}
@@ -135,7 +136,7 @@ func (iop *InsertOneParams) valid() bool {
 	return iop.Collection != ""
 }
 
-func (mc *mongoClient) InsertOne(l logger, cc *callContext, document interface{}, params *InsertOneParams) (interface{}, error) {
+func (mc *mongoClient) InsertOne(l types.Logger, cc *CallContext, document interface{}, params *InsertOneParams) (interface{}, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return nil, MissingRequiredParameterError{}
@@ -162,17 +163,13 @@ func (imp *InsertManyParams) valid() bool {
 	return imp.Collection != ""
 }
 
-func (mc *mongoClient) InsertMany(l logger, cc *callContext, data interface{}, params *InsertManyParams) (interface{}, error) {
+func (mc *mongoClient) InsertMany(l types.Logger, cc *CallContext, data []interface{}, params *InsertManyParams) (interface{}, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return nil, MissingRequiredParameterError{}
 	}
-	dataSlice, ok := data.([]interface{})
-	if !ok {
-		return nil, fmt.Errorf("insert many provided data that is not a list")
-	}
 	collection := mc.Collection(params.Collection)
-	result, err := collection.InsertMany(cc.ctx, dataSlice, params.AdditionalOpts...)
+	result, err := collection.InsertMany(cc.ctx, data, params.AdditionalOpts...)
 	if err != nil {
 		if isCollisionErr(err) {
 			l.Error("collision found trying to insert many into %v: %v", params.Collection, err)
@@ -196,7 +193,7 @@ func (up *UpsertParams) valid() bool {
 	return up.Collection != "" && up.Filter != nil
 }
 
-func (mc *mongoClient) Upsert(l logger, cc *callContext, updates interface{}, params *UpsertParams) (int64, error) {
+func (mc *mongoClient) Upsert(l types.Logger, cc *CallContext, updates interface{}, params *UpsertParams) (int64, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return 0, MissingRequiredParameterError{}
@@ -234,7 +231,7 @@ func (dp *DeleteParams) valid() bool {
 	return dp.Collection != "" && dp.Filter != nil
 }
 
-func (mc *mongoClient) Delete(l logger, cc *callContext, params *DeleteParams) (int64, error) {
+func (mc *mongoClient) Delete(l types.Logger, cc *CallContext, params *DeleteParams) (int64, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return 0, MissingRequiredParameterError{}
