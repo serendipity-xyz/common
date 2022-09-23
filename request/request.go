@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// HTTPClient describes an http client
 type HTTPClient interface {
 	Do(*http.Request) (*http.Response, error)
 }
@@ -26,21 +27,21 @@ type request struct {
 	body            interface{}
 }
 
-type Response struct {
+type response struct {
 	resp     *http.Response
 	err      error
 	hasError bool
 }
 
-func (r *Response) IsError() bool {
+func (r *response) IsError() bool {
 	return r.hasError
 }
 
-func (r *Response) StatusCode() int {
+func (r *response) StatusCode() int {
 	return r.resp.StatusCode
 }
 
-func (r *request) Get(url string) (*Response, error) {
+func (r *request) Get(url string) (*response, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -51,14 +52,14 @@ func (r *request) Get(url string) (*Response, error) {
 	resp, err := r.Do(req)
 	fmt.Printf("get err => %v\n", err)
 	hasError := err != nil
-	return &Response{
+	return &response{
 		hasError: hasError,
 		resp:     resp,
 		err:      err,
 	}, err
 }
 
-func (r *request) Post(url string) (*Response, error) {
+func (r *request) Post(url string) (*response, error) {
 	if r.body == nil {
 		r.body = `{}`
 	}
@@ -73,7 +74,7 @@ func (r *request) Post(url string) (*Response, error) {
 	}
 	resp, err := r.Do(req)
 	hasError := err != nil
-	return &Response{
+	return &response{
 		hasError: hasError,
 		resp:     resp,
 		err:      err,

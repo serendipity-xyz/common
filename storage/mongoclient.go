@@ -10,15 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Decoder interface {
-	Decode(v interface{}) error
-}
-
 type cursorDecoder struct {
 	ctx    context.Context
 	cursor *mongo.Cursor
 }
 
+// Decode reads from the cursor and unmarshalls the data into the given
+// object pointer
 func (cd cursorDecoder) Decode(v interface{}) error {
 	return cd.cursor.All(cd.ctx, v)
 }
@@ -33,11 +31,14 @@ type callContext struct {
 	cancel context.CancelFunc
 }
 
-func NewCallContex() *callContext {
+// NewCallContext is used when a client wants to make a call to the data store and provide a
+// context object
+func NewCallContext() *callContext {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	return &callContext{ctx: ctx, cancel: cancel}
 }
 
+// NewMongoClient returns a new mongoDB client
 func NewMongoClient(client *mongo.Client, database *mongo.Database) *mongoClient {
 	return &mongoClient{
 		client:   client,
@@ -45,6 +46,7 @@ func NewMongoClient(client *mongo.Client, database *mongo.Database) *mongoClient
 	}
 }
 
+// Collection returns a mongoDB collection from the connected database
 func (mc *mongoClient) Collection(collection string) *mongo.Collection {
 	return mc.database.Collection(collection)
 }
@@ -61,6 +63,7 @@ func (mc *mongoClient) Close(l logger) {
 	}()
 }
 
+// FindOneParams
 type FindOneParams struct {
 	Collection     string
 	Filter         interface{}
@@ -70,6 +73,7 @@ type FindOneParams struct {
 func (fop *FindOneParams) valid() bool {
 	return fop.Collection != "" && fop.Filter != nil
 }
+
 func (mc *mongoClient) FindOne(l logger, cc *callContext, params *FindOneParams) (Decoder, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")

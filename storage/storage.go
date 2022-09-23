@@ -7,6 +7,23 @@ import (
 
 var runes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
+// Decoder represents an object that can be decoded (unmarshalled) into
+// an interface object
+type Decoder interface {
+	Decode(v interface{}) error
+}
+
+// Manager represents a struct that can interface with a backing data store
+type Manager interface {
+	FindOne(l logger, cc *callContext, params *FindOneParams) (Decoder, error)
+	FindMany(l logger, cc *callContext, params *FindManyParams) (Decoder, error)
+	InsertOne(l logger, cc *callContext, document interface{}, params *InsertOneParams) (interface{}, error)
+	InsertMany(l logger, cc *callContext, data interface{}, params *InsertManyParams) (interface{}, error)
+	Upsert(l logger, cc *callContext, updates interface{}, params *UpsertParams) (int64, error)
+	Delete(l logger, cc *callContext, params *DeleteParams) (int64, error)
+	Close(l logger)
+}
+
 type logger interface {
 	Debug(string, ...interface{})
 	Info(string, ...interface{})

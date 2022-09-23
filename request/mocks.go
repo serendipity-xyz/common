@@ -8,12 +8,16 @@ import (
 )
 
 type mock struct {
-	attempts          int
+	callCount         int
 	responses         []*http.Response
 	errors            []error
 	validators        []Validator
 	defaultStatusCode int
 }
+
+func (m *mock) CallCount() int { return m.callCount }
+
+func (m *mock) ResetCallCount() { m.callCount = 0 }
 
 type NewMockOpts struct {
 	Responses         []*http.Response
@@ -24,7 +28,7 @@ type NewMockOpts struct {
 
 func NewMock(opts *NewMockOpts) *mock {
 	return &mock{
-		attempts:          0,
+		callCount:         0,
 		responses:         opts.Responses,
 		errors:            opts.Errors,
 		defaultStatusCode: opts.DefaultStatusCode,
@@ -38,38 +42,43 @@ type Validator struct {
 	ExpectedURLPath string
 	ExpectedMethod  string
 
-	ExpectedStatusCode int
-
-	ExpectedBody string
-	BodyContains bool // instead of exact match check it contians this string
-
 	ExpectedCalledWith string
-	CalledWithContains bool // instead of exact match check it contians this string
+	Fuzzy              bool // instead of exact match check it contians this string
 }
 
 func (v *Validator) validate(req *http.Request) error {
-	bodyBytes, _ := ioutil.ReadAll(req.Body) // we swallow error so the bodyBytes may be an empty array
+	bodyBytes := make([]byte, 0)
+	if req.Body != nil {
+		bodyBytes, _ = ioutil.ReadAll(req.Body) // we swallow error so the bodyBytes may be an empty array
+	}
 	body := string(bodyBytes)
-	if v.ExpectedBody != "" {
-		if v.BodyContains {
-			if !strings.Contains(body, v.ExpectedBody) {
+	if v.ExpectedCalledWith != "" {
+		if v.Fuzzy {
+			if !strings.Contains(body, v.ExpectedCalledWith) {
 				return validationError{Reason: fmt.Sprintf("body does not fuzzy contain validator (name: %v) expected body", v.Name)}
-			} else {
-				if body != v.ExpectedBody {
-					return validationError{Reason: fmt.Sprintf("body does not full contain validator (name: %v) expected body", v.Name)}
-				}
+			}
+		} else {
+			if body != v.ExpectedCalledWith {
+				return validationError{Reason: fmt.Sprintf("body does not full contain validator (name: %v) expected body", v.Name)}
 			}
 		}
 	}
 	if v.ExpectedMethod != "" {
-		// TODO: finish handling all the validation methods and them implement the unit tests to make
-		// use of these validators
+		if v.ExpectedMethod != req.Method {
+			return validationError{Reason: fmt.Sprintf("unexpected method (name: %v)", v.Name)}
+		}
 	}
-	return validationError{Reason: "invalid"}
+	if v.ExpectedURLPath != "" {
+		path := req.URL.Path
+		if v.ExpectedURLPath != path {
+			return validationError{Reason: fmt.Sprintf("unexpected URL path (name: %v)", v.Name)}
+		}
+	}
+	return nil
 }
 
 func (m *mock) Do(req *http.Request) (*http.Response, error) {
-	currAttempt := m.attempts
+	currAttempt := m.callCount
 	var resp *http.Response
 	var err error
 	if currAttempt < len(m.responses) {
@@ -81,7 +90,7 @@ func (m *mock) Do(req *http.Request) (*http.Response, error) {
 	if currAttempt < len(m.validators) {
 		err = m.validators[currAttempt].validate(req)
 	}
-	m.attempts++
+	m.callCount++
 	return resp, err
 }
 
