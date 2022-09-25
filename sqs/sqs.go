@@ -2,6 +2,8 @@ package sqs
 
 import (
 	"encoding/json"
+	"errors"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -24,15 +26,14 @@ type ClientParams struct {
 }
 
 func NewClient(params *ClientParams) (*Client, error) {
-	// creds := &credentials.StaticProvider{
-	// 	Value: credentials.Value{
-	// 		AccessKeyID:     params.AccessKey,
-	// 		SecretAccessKey: params.AccessSecret,
-	// 	},
-	// }
+	if e := os.Getenv("AWS_ACCESS_KEY_ID"); e == "" {
+		return nil, errors.New("no access key set on env.. set AWS_ACCESS_KEY_ID environment variable")
+	}
+	if e := os.Getenv("AWS_SECRET_ACCESS_KEY"); e == "" {
+		return nil, errors.New("no access key set on env.. set AWS_SECRET_ACCESS_KEY environment variable")
+	}
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(params.Region),
-		// Credentials: credentials.NewCredentials(creds),
 	}))
 	sqsClient := sqs.New(sess)
 	result, err := sqsClient.GetQueueUrl(&sqs.GetQueueUrlInput{
