@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/serendipity-xyz/core/request"
-	"github.com/serendipity-xyz/core/storage"
-	"github.com/serendipity-xyz/core/types"
+	"github.com/serendipity-xyz/common/request"
+	"github.com/serendipity-xyz/common/storage"
+	"github.com/serendipity-xyz/common/types"
 )
 
 var (

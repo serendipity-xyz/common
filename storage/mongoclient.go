@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/serendipity-xyz/core/types"
+	"github.com/serendipity-xyz/common/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

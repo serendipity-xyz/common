@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/serendipity-xyz/core/types"
+	"github.com/serendipity-xyz/common/types"
 )
 
 var runes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")

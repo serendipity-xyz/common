@@ -1,10 +1,9 @@
 FROM golang:1.18
 
-WORKDIR /go/src/serendipity-xyz/core/
+WORKDIR /go/src/serendipity-xyz/common
 
 COPY . .
 
-RUN go get -d -v ./...
-RUN go install -v ./...
+RUN go mod tidy
 
-CMD ["go test -v ./..."]
+ENTRYPOINT ["go", "test", "-v", "./..."]
