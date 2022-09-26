@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/serendipity-xyz/core/types"
+	"github.com/serendipity-xyz/common/types"
 )
 
 type Client struct {

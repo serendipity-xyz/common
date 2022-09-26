@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/serendipity-xyz/core/request"
+	"github.com/serendipity-xyz/common/request"
 	"github.com/stretchr/testify/require"
 )
 
