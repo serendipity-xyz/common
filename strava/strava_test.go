@@ -83,7 +83,7 @@ func TestAuthorizationURL(t *testing.T) {
 		ClientID:    "mockClientId",
 		RedirectURI: "mockRedirecturi",
 	})
-	url := sc.AuthorizationURL("mockScope")
+	url := sc.AuthorizationURL("mockScope", strava.Web)
 	require.Equal(t, "https://www.strava.com/oauth/authorize?client_id=mockClientId&response_type=code&redirect_uri=mockRedirecturi&approval_prompt=auto&scope=mockScope", url, "urls should match [0]")
 }
 

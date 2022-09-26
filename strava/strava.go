@@ -23,6 +23,15 @@ const (
 	maxUnauthorizedRetries = 1
 )
 
+type Device int
+
+const (
+	IOS Device = iota
+	Android
+	Web
+	Mobile // general catch all if we know mobile but not sure OS
+)
+
 type Tokens struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
@@ -77,8 +86,16 @@ func (sc *Client) SetClient(client request.HTTPClient) {
 }
 
 // AuthorizationURL returns the redirect URL for strava to authenticate a user
-func (sc *Client) AuthorizationURL(scope string) string {
-	return fmt.Sprintf("%v?client_id=%v&response_type=code&redirect_uri=%v&approval_prompt=auto&scope=%v", stravaWebAuthURI, sc.clientID, sc.redirectURI, scope)
+func (sc *Client) AuthorizationURL(scope string, device Device) string {
+	base := stravaWebAuthURI
+	if device == IOS {
+		base = stravaIOSAuthURI
+	} else if device == Android {
+		base = stravaAndroidAuthURI
+	} else if device == Mobile {
+		base = stravaAndroidAuthURI
+	}
+	return fmt.Sprintf("%v?client_id=%v&response_type=code&redirect_uri=%v&approval_prompt=auto&scope=%v", base, sc.clientID, sc.redirectURI, scope)
 }
 
 type Athlete struct {
