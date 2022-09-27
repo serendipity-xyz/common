@@ -50,7 +50,6 @@ func (r *request) Get(url string) (*response, error) {
 		req.Header.Set(k, v)
 	}
 	resp, err := r.Do(req)
-	fmt.Printf("get err => %v\n", err)
 	hasError := err != nil
 	return &response{
 		hasError: hasError,
