@@ -81,6 +81,30 @@ func (m Msg) I(key string) int {
 	return i
 }
 
+func (m Msg) I64(key string) int64 {
+	wrapper, ok := m[key]
+	if !ok {
+		return -1
+	}
+	i, ok := wrapper.(int64)
+	if !ok {
+		return -1
+	}
+	return i
+}
+
+func (m Msg) F64(key string) float64 {
+	wrapper, ok := m[key]
+	if !ok {
+		return -1
+	}
+	f, ok := wrapper.(float64)
+	if !ok {
+		return -1
+	}
+	return f
+}
+
 func (m Msg) S(key string) string {
 	wrapper, ok := m[key]
 	if !ok {
