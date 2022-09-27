@@ -217,7 +217,6 @@ type Activities []struct {
 		SummaryPolyline string `json:"summary_polyline"`
 		ResourceState   int    `json:"resource_state"`
 	} `json:"map"`
-
 	Private          bool      `json:"private"`
 	Visibility       string    `json:"visibility"`
 	StartLatlng      []float64 `json:"start_latlng"`
@@ -269,7 +268,11 @@ func (sc *Client) listActivities(l types.Logger) (Activities, error) {
 }
 
 type Activity struct {
-	ID              int64     `json:"id"`
+	ID      int64 `json:"id"`
+	Athlete struct {
+		ID            int `json:"id"`
+		ResourceState int `json:"resource_state"`
+	} `json:"athlete"`
 	ExternalID      string    `json:"external_id"`
 	UploadID        int64     `json:"upload_id"`
 	Name            string    `json:"name"`
@@ -277,7 +280,7 @@ type Activity struct {
 	MovingTime      int       `json:"moving_time"`
 	ElapsedTime     int       `json:"elapsed_time"`
 	Type            string    `json:"type"`
-	StartDate       time.Time `json:"start_date"`
+	StartDate       string    `json:"start_date"`
 	StartDateLocal  time.Time `json:"start_date_local"`
 	TimeZone        string    `json:"time_zone"`
 	StartLatlng     []float64 `json:"start_latlng"`
@@ -290,7 +293,33 @@ type Activity struct {
 		Polyline        string `json:"polyline"`
 		SummaryPolyline string `json:"summary_polyline"`
 	} `json:"map"`
-	Description string `json:"description"`
+	Description string          `json:"description"`
+	Splits      []ActivitySplit `json:"splits_metric"`
+}
+
+func (a Activity) StartTime() (time.Time, error) {
+	t, err := time.Parse(time.RFC3339, a.StartDate)
+	if err != nil {
+		return t, err
+	}
+	return t, nil
+}
+
+type ActivitySplit struct {
+	Index                     int     `json:"index"`
+	Distance                  float64 `json:"distance"`     // in meters
+	ElapsedTime               int     `json:"elapsed_time"` // in seconds
+	ElevationDifference       float64 `json:"elevation_difference"`
+	MovingTime                int     `json:"moving_time"`
+	Split                     int     `json:"split"`
+	AverageSpeed              float64 `json:"average_speed"`
+	AverageGradeAdjustedSpeed float64 `json:"average_grade_adjusted_speed"`
+	AverageHeartrate          float64 `json:"average_heartrate"`
+	PaceZone                  int     `json:"pace_zone"`
+}
+
+func (as ActivitySplit) MetersPerSecond() float64 {
+	return as.Distance / float64(as.ElapsedTime)
 }
 
 // GetActivity returns a user's strava activity given an activityId
@@ -321,7 +350,7 @@ func (sc *Client) getActivity(l types.Logger, activityID int64) (*Activity, erro
 	r := request.DefaultR(sc.httpClient).SetResult(&activity).SetReason(&reason)
 	resp, err := r.Get(url)
 	if err != nil {
-		l.Error("unable to get strava activity: %v", err)
+		l.Error("unable to get strava activity: %v: %v", err, reason)
 		return activity, err
 	}
 	if resp.IsError() {
