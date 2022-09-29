@@ -1,3 +1,5 @@
+![CircleCI](https://circleci.com/gh/serendipity-xyz/common.svg?style=shield)
+
 # common
 reusable clients across different microservices in serendipity. I attempted to make them as
 generic as possible so that they may be of use to others.
