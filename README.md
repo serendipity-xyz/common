@@ -1,8 +1,9 @@
+# Core
+
 ![CircleCI](https://circleci.com/gh/serendipity-xyz/common.svg?style=shield)
 
-# common
 reusable clients across different microservices in serendipity. I attempted to make them as
-generic as possible so that they may be of use to others.
+generic as possible so that they may be of use to others. 
 
 ### Requests
 Inspired by the [imroc/req](https://github.com/imroc/req) library but I did not like how they supported testing.
