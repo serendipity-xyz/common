@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/serendipity-xyz/common/mocks"
 	"github.com/serendipity-xyz/common/request"
 	"github.com/stretchr/testify/require"
 )
@@ -18,14 +19,14 @@ func TestMain(m *testing.M) {
 
 func TestSuccessfulGet(t *testing.T) {
 	body := `{"hello": "test", "world": 3}`
-	httpClient := request.NewMock(&request.NewMockOpts{
+	httpClient := mocks.NewRequestMock(&mocks.NewRequestMockOpts{
 		Responses: []*http.Response{
 			{
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(bytes.NewReader([]byte(body))),
 			},
 		},
-		Validators: []request.Validator{
+		Validators: []mocks.RequestValidator{
 			{
 				ExpectedMethod:  "GET",
 				ExpectedURLPath: "mockURL/v1/path",
@@ -46,14 +47,14 @@ func TestSuccessfulGet(t *testing.T) {
 }
 
 func TestFailedGet(t *testing.T) {
-	httpClient := request.NewMock(&request.NewMockOpts{
+	httpClient := mocks.NewRequestMock(&mocks.NewRequestMockOpts{
 		Responses: []*http.Response{
 			{
 				StatusCode: 400,
 				Body:       ioutil.NopCloser(bytes.NewReader([]byte(`{"error": "myError"}`))),
 			},
 		},
-		Validators: []request.Validator{
+		Validators: []mocks.RequestValidator{
 			{
 				ExpectedMethod:  "GET",
 				ExpectedURLPath: "mockURL/v1/path",
@@ -74,7 +75,7 @@ func TestFailedGet(t *testing.T) {
 }
 
 func TestRetryGet(t *testing.T) {
-	httpClient := request.NewMock(&request.NewMockOpts{
+	httpClient := mocks.NewRequestMock(&mocks.NewRequestMockOpts{
 		Responses: []*http.Response{
 			{
 				StatusCode: 500,
@@ -85,7 +86,7 @@ func TestRetryGet(t *testing.T) {
 				Body:       ioutil.NopCloser(bytes.NewReader([]byte(`{"hello": "test", "world": 3}`))),
 			},
 		},
-		Validators: []request.Validator{
+		Validators: []mocks.RequestValidator{
 			{
 				ExpectedMethod:  "GET",
 				ExpectedURLPath: "mockURL/v1/path",
@@ -110,7 +111,7 @@ func TestRetryGet(t *testing.T) {
 }
 
 func TestMaxRetriesExhausted(t *testing.T) {
-	httpClient := request.NewMock(&request.NewMockOpts{
+	httpClient := mocks.NewRequestMock(&mocks.NewRequestMockOpts{
 		Responses: []*http.Response{
 			{
 				StatusCode: 500,
@@ -125,7 +126,7 @@ func TestMaxRetriesExhausted(t *testing.T) {
 				Body:       ioutil.NopCloser(bytes.NewReader([]byte(`{}`))),
 			},
 		},
-		Validators: []request.Validator{
+		Validators: []mocks.RequestValidator{
 			{
 				ExpectedMethod:  "GET",
 				ExpectedURLPath: "mockURL/v1/path",
@@ -152,14 +153,14 @@ func TestMaxRetriesExhausted(t *testing.T) {
 func TestSuccessfulPost(t *testing.T) {
 	body := "test"
 	returnBody := `{"yoohoo": true}`
-	httpClient := request.NewMock(&request.NewMockOpts{
+	httpClient := mocks.NewRequestMock(&mocks.NewRequestMockOpts{
 		Responses: []*http.Response{
 			{
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(bytes.NewReader([]byte(returnBody))),
 			},
 		},
-		Validators: []request.Validator{
+		Validators: []mocks.RequestValidator{
 			{
 				ExpectedMethod:     "POST",
 				ExpectedURLPath:    "mockURL/v1/path",
@@ -183,7 +184,7 @@ func TestSuccessfulPost(t *testing.T) {
 func TestSuccessfulPostRetry(t *testing.T) {
 	body := "test"
 	returnBody := `{"yoohoo": true}`
-	httpClient := request.NewMock(&request.NewMockOpts{
+	httpClient := mocks.NewRequestMock(&mocks.NewRequestMockOpts{
 		Responses: []*http.Response{
 			{
 				StatusCode: 500,
@@ -194,7 +195,7 @@ func TestSuccessfulPostRetry(t *testing.T) {
 				Body:       ioutil.NopCloser(bytes.NewReader([]byte(returnBody))),
 			},
 		},
-		Validators: []request.Validator{
+		Validators: []mocks.RequestValidator{
 			{
 				ExpectedMethod:     "POST",
 				ExpectedURLPath:    "mockURL/v1/path",

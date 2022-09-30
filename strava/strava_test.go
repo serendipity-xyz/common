@@ -2,14 +2,12 @@ package strava_test
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
 
-	"github.com/serendipity-xyz/common/request"
-	"github.com/serendipity-xyz/common/storage"
+	"github.com/serendipity-xyz/common/mocks"
 	"github.com/serendipity-xyz/common/strava"
 	"github.com/serendipity-xyz/common/types"
 	"github.com/stretchr/testify/require"
@@ -20,63 +18,11 @@ func TestMain(m *testing.M) {
 	os.Exit(exitVal)
 }
 
-type mockStdOutLogger struct{}
-
-func (l mockStdOutLogger) Debug(s string, a ...interface{}) {
-	fmt.Printf(s, a...)
-}
-
-func (l mockStdOutLogger) Info(s string, a ...interface{}) {
-	fmt.Printf(s, a...)
-}
-
-func (l mockStdOutLogger) Warn(s string, a ...interface{}) {
-	fmt.Printf(s, a...)
-}
-
-func (l mockStdOutLogger) Error(s string, a ...interface{}) {
-	fmt.Printf(s, a...)
-}
-
 type MockUserService struct{}
 
 func (mock *MockUserService) SetUserTokens(cc strava.CallContextalizer, userID string, tokens strava.Tokens) error {
 	return nil
 }
-
-type MockDecoder struct{}
-
-func (md MockDecoder) Decode(v interface{}) error {
-	return nil
-}
-
-type MockDBManager struct{}
-
-func (mm MockDBManager) FindOne(l types.Logger, cc *storage.CallContext, params *storage.FindOneParams) (storage.Decoder, error) {
-	return MockDecoder{}, nil
-}
-
-func (mm MockDBManager) FindMany(l types.Logger, cc *storage.CallContext, params *storage.FindManyParams) (storage.Decoder, error) {
-	return MockDecoder{}, nil
-}
-
-func (mm MockDBManager) InsertOne(l types.Logger, cc *storage.CallContext, document interface{}, params *storage.InsertOneParams) (interface{}, error) {
-	return "someId", nil
-}
-
-func (mm MockDBManager) InsertMany(l types.Logger, cc *storage.CallContext, data []interface{}, params *storage.InsertManyParams) (interface{}, error) {
-	return []string{"Id1", "Id2"}, nil
-}
-
-func (mm MockDBManager) Upsert(l types.Logger, cc *storage.CallContext, updates interface{}, params *storage.UpsertParams) (int64, error) {
-	return 0, nil
-}
-
-func (mm MockDBManager) Delete(l types.Logger, cc *storage.CallContext, params *storage.DeleteParams) (int64, error) {
-	return 0, nil
-}
-
-func (mm MockDBManager) Close(l types.Logger) {}
 
 func TestAuthorizationURL(t *testing.T) {
 	sc := strava.NewClient("mockUserID", strava.Tokens{}, &MockUserService{}, &strava.ClientParams{
@@ -89,7 +35,7 @@ func TestAuthorizationURL(t *testing.T) {
 
 func TestCanGenerateTokens(t *testing.T) {
 	stravaClient := strava.NewClient("mockUserId", strava.Tokens{}, &MockUserService{}, &strava.ClientParams{})
-	mc := request.NewMock(&request.NewMockOpts{
+	mc := mocks.NewRequestMock(&mocks.NewRequestMockOpts{
 		Responses: []*http.Response{
 			{
 				StatusCode: 200,
@@ -116,7 +62,7 @@ func TestCanGenerateTokens(t *testing.T) {
 		},
 	})
 	stravaClient.SetClient(mc)
-	res, err := stravaClient.GenerateTokens(mockStdOutLogger{}, "mockCode")
+	res, err := stravaClient.GenerateTokens(types.StdOutLogger{}, "mockCode")
 	require.Nil(t, err, "no error")
 	require.Equal(t, strava.TokenResponse{
 		TokenType:    "test",

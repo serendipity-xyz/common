@@ -1,4 +1,4 @@
-package request
+package mocks
 
 import (
 	"fmt"
@@ -7,27 +7,27 @@ import (
 	"strings"
 )
 
-type mock struct {
+type requestMock struct {
 	callCount         int
 	responses         []*http.Response
 	errors            []error
-	validators        []Validator
+	validators        []RequestValidator
 	defaultStatusCode int
 }
 
-func (m *mock) CallCount() int { return m.callCount }
+func (m *requestMock) CallCount() int { return m.callCount }
 
-func (m *mock) ResetCallCount() { m.callCount = 0 }
+func (m *requestMock) ResetCallCount() { m.callCount = 0 }
 
-type NewMockOpts struct {
+type NewRequestMockOpts struct {
 	Responses         []*http.Response
 	Errors            []error
-	Validators        []Validator
+	Validators        []RequestValidator
 	DefaultStatusCode int
 }
 
-func NewMock(opts *NewMockOpts) *mock {
-	return &mock{
+func NewRequestMock(opts *NewRequestMockOpts) *requestMock {
+	return &requestMock{
 		callCount:         0,
 		responses:         opts.Responses,
 		errors:            opts.Errors,
@@ -36,7 +36,7 @@ func NewMock(opts *NewMockOpts) *mock {
 	}
 }
 
-type Validator struct {
+type RequestValidator struct {
 	Name string // easier for identification on error
 
 	ExpectedURLPath string
@@ -46,7 +46,7 @@ type Validator struct {
 	Fuzzy              bool // instead of exact match check it contians this string
 }
 
-func (v *Validator) validate(req *http.Request) error {
+func (v *RequestValidator) validate(req *http.Request) error {
 	bodyBytes := make([]byte, 0)
 	if req.Body != nil {
 		bodyBytes, _ = ioutil.ReadAll(req.Body) // we swallow error so the bodyBytes may be an empty array
@@ -77,7 +77,7 @@ func (v *Validator) validate(req *http.Request) error {
 	return nil
 }
 
-func (m *mock) Do(req *http.Request) (*http.Response, error) {
+func (m *requestMock) Do(req *http.Request) (*http.Response, error) {
 	currAttempt := m.callCount
 	var resp *http.Response
 	var err error
