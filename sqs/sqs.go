@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/serendipity-xyz/common/types"
@@ -26,14 +27,16 @@ type ClientParams struct {
 }
 
 func NewClient(params *ClientParams) (*Client, error) {
-	if e := os.Getenv("AWS_ACCESS_KEY_ID"); e == "" {
-		return nil, errors.New("no access key set on env.. set AWS_ACCESS_KEY_ID environment variable")
+	if e := os.Getenv("AWS_ACCESS_KEY_ID"); e == "" && params.AccessKey == "" {
+		return nil, errors.New("no access key.. set AWS_ACCESS_KEY_ID environment variable")
 	}
-	if e := os.Getenv("AWS_SECRET_ACCESS_KEY"); e == "" {
-		return nil, errors.New("no access key set on env.. set AWS_SECRET_ACCESS_KEY environment variable")
+	if e := os.Getenv("AWS_SECRET_ACCESS_KEY"); e == "" && params.AccessSecret == "" {
+		return nil, errors.New("no access key.. set AWS_SECRET_ACCESS_KEY environment variable")
 	}
+	creds := credentials.NewStaticCredentials(params.AccessKey, params.AccessSecret, "")
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(params.Region),
+		Credentials: creds,
+		Region:      aws.String(params.Region),
 	}))
 	sqsClient := sqs.New(sess)
 	result, err := sqsClient.GetQueueUrl(&sqs.GetQueueUrlInput{
