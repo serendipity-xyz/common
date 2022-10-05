@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/serendipity-xyz/common/log"
 	"github.com/serendipity-xyz/common/request"
 	"github.com/serendipity-xyz/common/storage"
-	"github.com/serendipity-xyz/common/types"
 )
 
 var (
@@ -40,7 +40,7 @@ type Tokens struct {
 
 type CallContextalizer interface {
 	DatabaseManager() storage.Manager
-	L() types.Logger
+	L() log.Logger
 }
 
 type TokenManager interface {
@@ -121,7 +121,7 @@ type TokenResponse struct {
 
 // GenerateTokens is used when a user is authenticating via strava. Strava will redirect them to
 // our app with a code in the query parameters that allows us to generate new tokens.
-func (sc *Client) GenerateTokens(l types.Logger, code string) (TokenResponse, error) {
+func (sc *Client) GenerateTokens(l log.Logger, code string) (TokenResponse, error) {
 	url := fmt.Sprintf("%v/oauth/token?client_id=%v&client_secret=%v&code=%v&grant_type=authorization_code", stravaAPIBaseURL, sc.clientID, sc.clientSecret, code)
 	var result TokenResponse
 	var reason interface{}
@@ -245,7 +245,7 @@ func (sc *Client) ListActivities(cc CallContextalizer) (Activities, error) {
 	return activites, err
 }
 
-func (sc *Client) listActivities(l types.Logger) (Activities, error) {
+func (sc *Client) listActivities(l log.Logger) (Activities, error) {
 	url := fmt.Sprintf("%v/athlete/activities?access_token=%v", stravaAPIBaseURL, sc.accessToken)
 	var activites Activities
 	var reason interface{}
@@ -343,7 +343,7 @@ func (sc *Client) GetActivity(cc CallContextalizer, activityID int64) (*Activity
 	return activity, err
 }
 
-func (sc *Client) getActivity(l types.Logger, activityID int64) (*Activity, error) {
+func (sc *Client) getActivity(l log.Logger, activityID int64) (*Activity, error) {
 	url := fmt.Sprintf("%v/activities/%v?access_token=%v", stravaAPIBaseURL, activityID, sc.accessToken)
 	var activity *Activity
 	var reason interface{}

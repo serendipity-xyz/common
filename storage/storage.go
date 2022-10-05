@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/serendipity-xyz/common/types"
+	"github.com/serendipity-xyz/common/log"
 )
 
 var runes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
@@ -17,13 +17,13 @@ type Decoder interface {
 
 // Manager represents a struct that can interface with a backing data store
 type Manager interface {
-	FindOne(l types.Logger, cc *CallContext, params *FindOneParams) (Decoder, error)
-	FindMany(l types.Logger, cc *CallContext, params *FindManyParams) (Decoder, error)
-	InsertOne(l types.Logger, cc *CallContext, document interface{}, params *InsertOneParams) (interface{}, error)
-	InsertMany(l types.Logger, cc *CallContext, data []interface{}, params *InsertManyParams) (interface{}, error)
-	Upsert(l types.Logger, cc *CallContext, updates interface{}, params *UpsertParams) (int64, error)
-	Delete(l types.Logger, cc *CallContext, params *DeleteParams) (int64, error)
-	Close(l types.Logger)
+	FindOne(l log.Logger, cc *CallContext, params *FindOneParams) (Decoder, error)
+	FindMany(l log.Logger, cc *CallContext, params *FindManyParams) (Decoder, error)
+	InsertOne(l log.Logger, cc *CallContext, document interface{}, params *InsertOneParams) (interface{}, error)
+	InsertMany(l log.Logger, cc *CallContext, data []interface{}, params *InsertManyParams) (interface{}, error)
+	Upsert(l log.Logger, cc *CallContext, updates interface{}, params *UpsertParams) (int64, error)
+	Delete(l log.Logger, cc *CallContext, params *DeleteParams) (int64, error)
+	Close(l log.Logger)
 }
 
 // GenerateID allows us to easily generate a new ID. If we want to

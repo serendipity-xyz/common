@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/serendipity-xyz/common/types"
+	"github.com/serendipity-xyz/common/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -52,7 +52,7 @@ func (mc *mongoClient) Collection(collection string) *mongo.Collection {
 	return mc.database.Collection(collection)
 }
 
-func (mc *mongoClient) Close(l types.Logger) {
+func (mc *mongoClient) Close(l log.Logger) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	defer func() {
@@ -75,7 +75,7 @@ func (fop *FindOneParams) valid() bool {
 	return fop.Collection != "" && fop.Filter != nil
 }
 
-func (mc *mongoClient) FindOne(l types.Logger, cc *CallContext, params *FindOneParams) (Decoder, error) {
+func (mc *mongoClient) FindOne(l log.Logger, cc *CallContext, params *FindOneParams) (Decoder, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return nil, MissingRequiredParameterError{}
@@ -110,7 +110,7 @@ func (fmp *FindManyParams) valid() bool {
 	return fmp.Collection != "" && fmp.Filter != nil
 }
 
-func (mc *mongoClient) FindMany(l types.Logger, cc *CallContext, params *FindManyParams) (Decoder, error) {
+func (mc *mongoClient) FindMany(l log.Logger, cc *CallContext, params *FindManyParams) (Decoder, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return nil, MissingRequiredParameterError{}
@@ -136,7 +136,7 @@ func (iop *InsertOneParams) valid() bool {
 	return iop.Collection != ""
 }
 
-func (mc *mongoClient) InsertOne(l types.Logger, cc *CallContext, document interface{}, params *InsertOneParams) (interface{}, error) {
+func (mc *mongoClient) InsertOne(l log.Logger, cc *CallContext, document interface{}, params *InsertOneParams) (interface{}, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return nil, MissingRequiredParameterError{}
@@ -163,7 +163,7 @@ func (imp *InsertManyParams) valid() bool {
 	return imp.Collection != ""
 }
 
-func (mc *mongoClient) InsertMany(l types.Logger, cc *CallContext, data []interface{}, params *InsertManyParams) (interface{}, error) {
+func (mc *mongoClient) InsertMany(l log.Logger, cc *CallContext, data []interface{}, params *InsertManyParams) (interface{}, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return nil, MissingRequiredParameterError{}
@@ -193,7 +193,7 @@ func (up *UpsertParams) valid() bool {
 	return up.Collection != "" && up.Filter != nil
 }
 
-func (mc *mongoClient) Upsert(l types.Logger, cc *CallContext, updates interface{}, params *UpsertParams) (int64, error) {
+func (mc *mongoClient) Upsert(l log.Logger, cc *CallContext, updates interface{}, params *UpsertParams) (int64, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return 0, MissingRequiredParameterError{}
@@ -231,7 +231,7 @@ func (dp *DeleteParams) valid() bool {
 	return dp.Collection != "" && dp.Filter != nil
 }
 
-func (mc *mongoClient) Delete(l types.Logger, cc *CallContext, params *DeleteParams) (int64, error) {
+func (mc *mongoClient) Delete(l log.Logger, cc *CallContext, params *DeleteParams) (int64, error) {
 	if ok := params.valid(); !ok {
 		l.Error("invalid parameters")
 		return 0, MissingRequiredParameterError{}

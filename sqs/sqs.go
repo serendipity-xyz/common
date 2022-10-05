@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/serendipity-xyz/common/types"
+	"github.com/serendipity-xyz/common/log"
 )
 
 type Client struct {
@@ -154,7 +154,7 @@ type Consumer struct {
 
 func (c *Consumer) MsgChan() chan *Msg { return c.msgChan }
 
-func (c *Consumer) Poll(l types.Logger) {
+func (c *Consumer) Poll(l log.Logger) {
 	for {
 		l.Info("polling message queue [%v]....", c.client.queueName)
 		output, err := c.client.sqsClient.ReceiveMessage(&sqs.ReceiveMessageInput{
@@ -182,7 +182,7 @@ func (c *Consumer) Poll(l types.Logger) {
 
 }
 
-func (c *Consumer) MarkProcessed(l types.Logger, msg *Msg) {
+func (c *Consumer) MarkProcessed(l log.Logger, msg *Msg) {
 	rh := msg.S("receiptHandle")
 	_, err := c.client.sqsClient.DeleteMessage(&sqs.DeleteMessageInput{
 		QueueUrl:      c.client.queueURL,

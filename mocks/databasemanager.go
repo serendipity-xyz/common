@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/serendipity-xyz/common/log"
 	"github.com/serendipity-xyz/common/storage"
-	"github.com/serendipity-xyz/common/types"
 )
 
 type MockDecoder struct {
@@ -59,7 +59,7 @@ func (mm *MockDBManager) validateFilter(filterToCheck interface{}) error {
 	return nil
 }
 
-func (mm *MockDBManager) FindOne(l types.Logger, cc *storage.CallContext, params *storage.FindOneParams) (storage.Decoder, error) {
+func (mm *MockDBManager) FindOne(l log.Logger, cc *storage.CallContext, params *storage.FindOneParams) (storage.Decoder, error) {
 	err := mm.validateFilter(params.Filter)
 	if err != nil {
 		return MockDecoder{}, err
@@ -75,7 +75,7 @@ func (mm *MockDBManager) FindOne(l types.Logger, cc *storage.CallContext, params
 	}, mm.getErr()
 }
 
-func (mm *MockDBManager) FindMany(l types.Logger, cc *storage.CallContext, params *storage.FindManyParams) (storage.Decoder, error) {
+func (mm *MockDBManager) FindMany(l log.Logger, cc *storage.CallContext, params *storage.FindManyParams) (storage.Decoder, error) {
 	err := mm.validateFilter(params.Filter)
 	if err != nil {
 		return MockDecoder{}, err
@@ -91,15 +91,15 @@ func (mm *MockDBManager) FindMany(l types.Logger, cc *storage.CallContext, param
 	}, mm.getErr()
 }
 
-func (mm *MockDBManager) InsertOne(l types.Logger, cc *storage.CallContext, document interface{}, params *storage.InsertOneParams) (interface{}, error) {
+func (mm *MockDBManager) InsertOne(l log.Logger, cc *storage.CallContext, document interface{}, params *storage.InsertOneParams) (interface{}, error) {
 	return "someId", nil
 }
 
-func (mm *MockDBManager) InsertMany(l types.Logger, cc *storage.CallContext, data []interface{}, params *storage.InsertManyParams) (interface{}, error) {
+func (mm *MockDBManager) InsertMany(l log.Logger, cc *storage.CallContext, data []interface{}, params *storage.InsertManyParams) (interface{}, error) {
 	return []string{"Id1", "Id2"}, nil
 }
 
-func (mm *MockDBManager) Upsert(l types.Logger, cc *storage.CallContext, updates interface{}, params *storage.UpsertParams) (int64, error) {
+func (mm *MockDBManager) Upsert(l log.Logger, cc *storage.CallContext, updates interface{}, params *storage.UpsertParams) (int64, error) {
 	err := mm.validateFilter(params.Filter)
 	if err != nil {
 		return 0, err
@@ -117,7 +117,7 @@ func (mm *MockDBManager) Upsert(l types.Logger, cc *storage.CallContext, updates
 	return respAsType, mm.getErr()
 }
 
-func (mm *MockDBManager) Delete(l types.Logger, cc *storage.CallContext, params *storage.DeleteParams) (int64, error) {
+func (mm *MockDBManager) Delete(l log.Logger, cc *storage.CallContext, params *storage.DeleteParams) (int64, error) {
 	err := mm.validateFilter(params.Filter)
 	if err != nil {
 		return 0, err
@@ -135,4 +135,4 @@ func (mm *MockDBManager) Delete(l types.Logger, cc *storage.CallContext, params 
 	return respAsType, mm.getErr()
 }
 
-func (mm MockDBManager) Close(l types.Logger) {}
+func (mm MockDBManager) Close(l log.Logger) {}
