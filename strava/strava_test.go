@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/serendipity-xyz/common/log"
 	"github.com/serendipity-xyz/common/mocks"
 	"github.com/serendipity-xyz/common/strava"
-	"github.com/serendipity-xyz/common/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -62,7 +62,7 @@ func TestCanGenerateTokens(t *testing.T) {
 		},
 	})
 	stravaClient.SetClient(mc)
-	res, err := stravaClient.GenerateTokens(types.StdOutLogger{}, "mockCode")
+	res, err := stravaClient.GenerateTokens(log.StdOutLogger{}, "mockCode")
 	require.Nil(t, err, "no error")
 	require.Equal(t, strava.TokenResponse{
 		TokenType:    "test",
