@@ -69,10 +69,11 @@ func (mm *MockDBManager) FindOne(l log.Logger, cc *storage.CallContext, params *
 		mm.CallCount++
 		return MockDecoder{}, err
 	}
+	e := mm.getErr()
 	mm.CallCount++
 	return MockDecoder{
 		data: resp,
-	}, mm.getErr()
+	}, e
 }
 
 func (mm *MockDBManager) FindMany(l log.Logger, cc *storage.CallContext, params *storage.FindManyParams) (storage.Decoder, error) {
