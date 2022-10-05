@@ -50,20 +50,20 @@ func NewClient(params *ClientParams) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Producer() *producer {
-	return &producer{
+func (c *Client) Producer() *Producer {
+	return &Producer{
 		client: c,
 	}
 }
 
-func (c *Client) Consumer() *consumer {
-	return &consumer{
+func (c *Client) Consumer() *Consumer {
+	return &Consumer{
 		client:  c,
 		msgChan: make(chan *Msg, 1),
 	}
 }
 
-type producer struct {
+type Producer struct {
 	client *Client
 }
 
@@ -129,7 +129,7 @@ func (m Msg) String() (string, error) {
 	return string(res), nil
 }
 
-func (p *producer) ProduceMsg(msg Msg) (string, error) {
+func (p *Producer) ProduceMsg(msg Msg) (string, error) {
 	s, err := msg.String()
 	if err != nil {
 		return "", err
@@ -144,14 +144,14 @@ func (p *producer) ProduceMsg(msg Msg) (string, error) {
 	return *res.MessageId, nil
 }
 
-type consumer struct {
+type Consumer struct {
 	client  *Client
 	msgChan chan *Msg
 }
 
-func (c *consumer) MsgChan() chan *Msg { return c.msgChan }
+func (c *Consumer) MsgChan() chan *Msg { return c.msgChan }
 
-func (c *consumer) Poll(l types.Logger) {
+func (c *Consumer) Poll(l types.Logger) {
 	for {
 		l.Info("polling message queue [%v]....", c.client.queueName)
 		output, err := c.client.sqsClient.ReceiveMessage(&sqs.ReceiveMessageInput{
@@ -179,7 +179,7 @@ func (c *consumer) Poll(l types.Logger) {
 
 }
 
-func (c *consumer) MarkProcessed(l types.Logger, msg *Msg) {
+func (c *Consumer) MarkProcessed(l types.Logger, msg *Msg) {
 	rh := msg.S("receiptHandle")
 	_, err := c.client.sqsClient.DeleteMessage(&sqs.DeleteMessageInput{
 		QueueUrl:      c.client.queueURL,
